@@ -135,6 +135,7 @@
  */
 #define CONFIG_MEM_NVM_BASE		0x08000000
 #define CONFIG_MEM_NVM_LEN		(1024 * 1024 * 1)
+
 #define CONFIG_ENVM			1
 #if defined(CONFIG_ENVM)
 # define CONFIG_SYS_ENVM_BASE		0x08000000
@@ -173,7 +174,7 @@
  * TBD: Check if external Flash is available on the Discovery board.
  * If not, remove the below defines related to external Flash.
  */
-#if 1
+#if 0
 
 /*
  * No external Flash
@@ -255,7 +256,7 @@
 #define CONFIG_STM32_USART_RX_IO_PORT	2	/* PORTC */
 #define CONFIG_STM32_USART_RX_IO_PIN	7	/* GPIO7 */
 
-#define CONFIG_BAUDRATE			115200
+#define CONFIG_BAUDRATE			9600
 #define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
 
 /*
@@ -357,7 +358,7 @@
 #undef CONFIG_CMD_FPGA
 #undef CONFIG_CMD_IMI
 #undef CONFIG_CMD_ITEST
-#undef CONFIG_CMD_IMLS
+#define CONFIG_CMD_IMLS
 #undef CONFIG_CMD_LOADS
 #undef CONFIG_CMD_MISC
 #define CONFIG_CMD_NET
@@ -378,14 +379,14 @@
 /*
  * Auto-boot sequence configuration
  */
-#define CONFIG_BOOTDELAY		3
+#define CONFIG_BOOTDELAY		0
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 #define CONFIG_BOOTCOMMAND		"run netboot"
 
 /* boot args and env */
 #define CONFIG_HOSTNAME			stm32f7-disco
 #define CONFIG_BOOTARGS			"stm32_platform=stm32f7-disco "	\
-					"console=ttyS5,115200 panic=10"
+					"console=ttyS5,9600 panic=10 initrd=0xC0208000,2M rw"
 
 #define LOADADDR			"0xC0007FC0"
 
@@ -405,11 +406,14 @@
 	"addip=setenv bootargs ${bootargs} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}:eth0:off\0"				\
 	"envmaddr=08040000\0"					\
 	"ethaddr=C0:B1:3C:88:88:85\0"				\
-	"ipaddr=172.17.4.206\0"					\
+	"ipaddr=172.17.0.2\0"					\
 	"serverip=172.17.0.1\0"					\
-	"image=stm32f7/uImage\0"		\
+	"netmask=255.255.255.0\0"					\
+	"gatewayip=172.17.0.1\0"					\
+	"image=stm32f7/system.uImage\0"		\
 	"stdin=serial\0"					\
-	"netboot=tftp ${image};run args addip;bootm\0"		\
+	"netboot=tftp ${image};run args addip;bootm 0xC0007FC0 0xC0207FC0\0"		\
+	"b2=tftp 0xc0007fc0 stm32f7/uImage;tftp 0xc0207fc0 stm32f7/root-ext2.img.gz.uimage;run args addip;bootm 0xC0007FC0 0xC0207FC0\0"		\
 	REV_EXTRA_ENV
 
 /*
