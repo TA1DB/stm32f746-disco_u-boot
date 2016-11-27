@@ -862,6 +862,20 @@ int boot_get_ramdisk (int argc, char *argv[], bootm_headers_t *images,
 			rd_data = image_get_data (rd_hdr);
 			rd_len = image_get_data_size (rd_hdr);
 			rd_load = image_get_load (rd_hdr);
+
+			/* Dirty code to force relocation to RAM even if U-Boot does not
+			consider this image is in flash, because it is not configured. */
+			if((void *)rd_addr < 0xc0000000) {
+				printf ("   Relocating Ramdisk to RAM at %08lx (%d bytes)...", rd_load, rd_len);
+				memcpy(rd_load, rd_addr, rd_len+76);
+				printf ("OK\n");
+				printf ("   Rereading Ramdisk from RAM...\n");
+				rd_hdr = image_get_ramdisk (rd_load, arch, images->verify);
+				rd_data = image_get_data (rd_hdr);
+	                        rd_len = image_get_data_size (rd_hdr);
+        	                rd_load = image_get_load (rd_hdr);
+			}
+
 			break;
 #if defined(CONFIG_FIT)
 		case IMAGE_FORMAT_FIT:
